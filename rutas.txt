@@ -1,1 +1,6 @@
 http://localhost:3000/register  M: post =>  { userName, userPassword }
+
+http://localhost:3000/login     M: post =>  { userName, userPassword }
+
+response:   {success: true, message: mensaje}
+            {success: false, error: el error respectivo}
