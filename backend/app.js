@@ -11,7 +11,7 @@ const db = mysql.createPool({
     database: "basic_crud"
 })
 
-app.post("/register", async (req, res) => {
+app.post("/register", async (req, res) => { // 8 
     let {userName, userPassword} = req.body
     try{
         const [result] = await db.query('INSERT INTO users (user_name,user_password) VALUES (?,?)', [userName,userPassword])
