@@ -13,9 +13,9 @@ const db = mysql.createPool({
 })
 
 app.post("/register", async (req, res) => { // 8 
-    let {userName, userPassword} = req.body
+    let object = req.body
     try{
-        const [result] = await db.query('INSERT INTO users (user_name,user_password) VALUES (?,?)', [userName,userPassword])
+        const [result] = await db.query('INSERT INTO users (user_name,user_password) VALUES (?,?)', [object.userName,object.userPassword])
         if(result.affectedRows == 0){
             return res.status(500).json({success: false, error: 'Query error'})
         }else{
@@ -27,12 +27,12 @@ app.post("/register", async (req, res) => { // 8
 })
 
 app.post("/login", async (req, res) => { // 13
-    let {userName, userPassword} = req.body
+    let object = req.body
     try{
-        const [result] = await db.query('SELECT * FROM users WHERE user_name = ?', [userName])
+        const [result] = await db.query('SELECT * FROM users WHERE user_name = ?', [object.userName])
         if(result.length == 0){
             return res.status(500).json({success: false, error: 'The user dosent exist'})
-        }else if (!(result[0].user_password == userPassword)){
+        }else if (!(result[0].user_password == object.userPassword)){
             return res.status(200).json({success: false, error: 'Wrong password'})
         }else{
             return res.status(200).json({success: true, message: 'User logged successfuly'})
