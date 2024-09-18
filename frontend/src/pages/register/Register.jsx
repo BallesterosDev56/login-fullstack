@@ -4,11 +4,30 @@ import {useForm} from 'react-hook-form'
 export const Register = ()=> {
     const {register, handleSubmit} = useForm();
 
+    const fetchRegister = async(object)=> {
+        let response = await fetch('http://localhost:3000/register', {
+            method: 'POST',
+            headers : { 
+                    'Content-Type' : 'application/json'
+            },
+            body: object
+        });
+        let data = await response.json();
+        return data;
+    }
+
     const onSubmit = (data)=> {
         
         if (data.Rpswrd == data.pswrd) {
-            console.log(data);
+            let objetData = {
+                userName: data.username,
+                userPassword: data.pswrd,
+            }
             
+            fetchRegister(objetData).then((data)=> {
+                console.log(data);
+                
+            })
         }
     }
 
@@ -18,8 +37,8 @@ export const Register = ()=> {
                 <div className="body-card">
                     <form onSubmit={handleSubmit(onSubmit)} className="form">
                         <div className="mx-5 my-5">
-                            <label className="form-label" htmlFor="email">Email:</label><br />
-                            <input {...register('email')} className="form-control" id="email" type="email" required/>
+                            <label className="form-label" htmlFor="username">Username:</label><br />
+                            <input {...register('username')} className="form-control" id="username" type="text" required/>
                         </div>
                         <div className="mx-5 my-5">
                             <label className="form-label" htmlFor="password">Password</label><br />
@@ -36,6 +55,6 @@ export const Register = ()=> {
                 </div>
             </div>
         </div>
-        
+
     )
 }
