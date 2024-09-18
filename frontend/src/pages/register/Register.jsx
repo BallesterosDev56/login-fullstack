@@ -4,8 +4,16 @@ import {useForm} from 'react-hook-form'
 export const Register = ()=> {
     const {register, handleSubmit} = useForm();
 
-    const fetchData = async()=> {
-        let response = await fetch('http://localhost:3000/register');
+    const fetchRegister = async(object)=> {
+        let response = await fetch('http://localhost:3000/register', {
+            method: 'POST',
+            headers : { 
+                    'Content-Type' : 'application/json'
+            },
+            body: object
+        });
+        let data = await response.json();
+        return data;
     }
 
     const onSubmit = (data)=> {
@@ -16,7 +24,10 @@ export const Register = ()=> {
                 userPassword: data.pswrd,
             }
             
-            
+            fetchRegister(objetData).then((data)=> {
+                console.log(data);
+                
+            })
         }
     }
 
