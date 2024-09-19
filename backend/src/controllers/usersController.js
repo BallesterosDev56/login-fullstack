@@ -1,8 +1,11 @@
+import e from "express"
 import { createUser, getUserByName } from "../repository/userRepo.js"
+import { userSchema } from "../schema/userSchema.js"
+import { ZodError } from "zod"
 
 export async function registerUserController(req, res) {
-    let object = req.body
     try{
+        let object = userSchema.parse(req.body)
         const result = await createUser(object.userName, object.userPassword)
         if(!result){
             return res.status(500).json({success: false, error: 'Query error'})
@@ -10,13 +13,16 @@ export async function registerUserController(req, res) {
             return res.status(200).json({success: true, message: 'User created successfuly'})
         }
     }catch(err){
-        res.status(500).json({success: false, error: err})
+        if(err instanceof ZodError){
+            return res.status(500).json({success: false, error: err.errors})
+        }
+        return res.status(500).json({success: false, error: err})
     }
 }
 
 export async function loginUserController(req, res) {
-    let object = req.body
     try{
+        let object = userSchema.parse(req.body)
         const result = await getUserByName(object.userName)
         if(!result){
             return res.status(500).json({success: false, error: 'The user dosent exist'})
@@ -26,6 +32,9 @@ export async function loginUserController(req, res) {
             return res.status(200).json({success: true, message: 'User logged successfuly'})
         }
     }catch(err){
-        res.status(500).json({success: false, error: err})
+        if(err instanceof ZodError){
+            return res.status(500).json({success: false, error: err.errors})
+        }
+        return res.status(500).json({success: false, error: err})
     }
 }
