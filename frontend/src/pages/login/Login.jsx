@@ -6,8 +6,24 @@ export const Login = ()=> {
 
     const onSubmit = (data)=> {
         
-        console.log(data);
-        
+        let objectData = {
+            userName: data.username,
+            userPassword: data.pswrd,
+        }
+        fetchLogin(objectData).then((response)=> {
+            console.log(response);
+            
+        })
+    }
+    const fetchLogin = async(object)=> {
+        let response = await fetch('http://localhost:3000/login', {
+            headers :{
+                'Content-Type' : 'application/json'
+            },
+            body: object,
+        });
+        let data = await response.json();
+        return data;
     }
 
     return(
