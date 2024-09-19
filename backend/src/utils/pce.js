@@ -33,7 +33,7 @@ function calculaCostos(permutacion, matrizPeso){
 
 
 // Evalua
-function caminoMenosCostoso(matrizPeso){
+export function caminoMenosCostoso(matrizPeso){
     const numeroNod = matrizPeso.length
     const nodos = Array.from({length: numeroNod}, (_,i) => i)
     const permutaciones = permutador(nodos)
