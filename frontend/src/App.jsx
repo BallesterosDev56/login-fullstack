@@ -6,6 +6,7 @@ import { Login } from './pages/login/Login'
 import { Home } from './pages/home/Home'
 import { AuthProvider } from './logic/AuthProvider'
 import { Redirect } from './pages/redirect/Redirect'
+import {ProtectedRoute} from './logic/ProtectedRoute'
 
 
 function App() {
@@ -24,7 +25,10 @@ function App() {
     }, 
     {
       path: '/home',
-      element: <Home></Home>
+      element: 
+      <ProtectedRoute>
+        <Home/>
+      </ProtectedRoute>
     }
   ])
 
