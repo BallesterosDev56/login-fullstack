@@ -5,15 +5,15 @@ import { useForm } from "react-hook-form"
 export const Home = ()=> {
     const {register, handleSubmit, reset} = useForm();
     const [locations, setlocations] = useState([]);
+    const [object, setObject] = useState(null);
 
     const onSubmit = (data)=> {                
-        let objectLocations = JSON.parse(data.locations);
+        let objectLocations = JSON.parse(data.locations);   
         setlocations((prev)=>[...prev, ...objectLocations.ubicaciones]);
+        setObject(data.locations);
 
         reset();
     }
-
-
 
 
     return(
@@ -30,7 +30,7 @@ export const Home = ()=> {
                             <button className="btn btn-primary" type="submit">Upload</button>
                         </div>
                     </form>
-                    <MapView locations={locations} object={data.locations}></MapView>
+                    <MapView locations={locations} object={object}></MapView>
                 </div>
             </div>
         </section>
