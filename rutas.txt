@@ -2,5 +2,7 @@ http://localhost:3000/register  M: post =>  { userName, userPassword }
 
 http://localhost:3000/login     M: post =>  { userName, userPassword }
 
+http://localhost:3000/graph     M: post =>  { json }
+
 response:   {success: true, message: mensaje}
             {success: false, error: el error respectivo}

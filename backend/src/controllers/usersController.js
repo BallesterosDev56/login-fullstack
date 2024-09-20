@@ -1,4 +1,3 @@
-import e from "express"
 import { createUser, getUserByName } from "../repository/userRepo.js"
 import { userSchema } from "../schema/userSchema.js"
 import { ZodError } from "zod"
