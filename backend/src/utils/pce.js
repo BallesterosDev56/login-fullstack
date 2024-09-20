@@ -127,8 +127,3 @@ let json = {
     ],
     "inicio": "A"
 }
-
-
-let [ruta, costo] = caminoMenosCostoso(json);
-console.log("Mejor ruta:", ruta);
-console.log("Costo:", costo);
