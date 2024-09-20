@@ -4,7 +4,7 @@ import mapImage from '../../assets/Colombia_Mapa_Oficial.svg.png'
 import 'leaflet/dist/leaflet.css'
 import { useEffect } from "react";
 
-const conexiones = [
+const connections = [
     { ubicacion1: "A", ubicacion2: "B", peso: 20 },
     { ubicacion1: "B", ubicacion2: "C", peso: 15 },
     { ubicacion1: "A", ubicacion2: "D", peso: 15 },
@@ -12,10 +12,10 @@ const conexiones = [
 
   
   //componente que maneja la imagen superpuesta
-  const ImageOverlay = ({ubicaciones, conexiones})=> {
+  const ImageOverlay = ({locations, connections})=> {
 
       const findUbication = (name)=> {
-          return ubicaciones.find((ubicacion)=> ubicacion.nombre===name);
+          return locations.find((location)=> location.nombre===name);
       }
 
       const map = useMap();
@@ -31,17 +31,17 @@ const conexiones = [
         map.fitBounds(bounds);
 
         //agregar los puntos prefedinidos
-        ubicaciones.forEach((ubicacion)=> {
-        L.marker([ubicacion.posY, ubicacion.posX])
+        locations.forEach((location)=> {
+        L.marker([location.posY, location.posX])
             .addTo(map)
-            .bindPopup(ubicacion.nombre);
+            .bindPopup(location.nombre);
 
         })
 
-        //agregar las conexiones entre los puntos
-        conexiones.forEach((conexion)=> {
-            const punto1 = findUbication(conexion.ubicacion1);
-            const punto2 = findUbication(conexion.ubicacion2);
+        //agregar las connections entre los puntos
+        connections.forEach((connection)=> {
+            const punto1 = findUbication(connection.ubicacion1);
+            const punto2 = findUbication(connection.ubicacion2);
 
             if (punto1 && punto2) {
                 L.polyline(
@@ -52,19 +52,19 @@ const conexiones = [
                         color: 'red'
                     }
                 ).addTo(map)
-                .bindPopup(`Peso: ${conexion.peso}`);
+                .bindPopup(`Peso: ${connection.peso}`);
                 
             }
 
         })
 
-    }, [map, ubicaciones])
+    }, [map, locations])
 
     return null;
 
 }
 
-export const MapView = ({ubicaciones})=> {
+export const MapView = ({locations})=> {
     const position = [50, 50];
     const zoom = 1;
     const style = { height: "68vh", width: "46%" }
@@ -77,7 +77,7 @@ export const MapView = ({ubicaciones})=> {
             crs={L.CRS.Simple}
         >
 
-        <ImageOverlay ubicaciones={ubicaciones} conexiones={conexiones}></ImageOverlay>
+        <ImageOverlay locations={locations} connections={connections}></ImageOverlay>
 
         </MapContainer>
     )

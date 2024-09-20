@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { MapView } from "../../components/mapView/MapView"
 import { useForm } from "react-hook-form"
 
 export const Home = ()=> {
     const {register, handleSubmit, reset} = useForm();
+    const [locations, setlocations] = useState([]);
 
     const ubi = [
         { nombre: "A", posX: 20, posY: 20 },
@@ -14,6 +16,7 @@ export const Home = ()=> {
     const onSubmit = (data)=> {
         console.log(data.locations);
         //ubicaciones de los markups
+        setlocations((prev)=>[...prev, ...data.locations])
 
         reset();
     }
@@ -30,10 +33,10 @@ export const Home = ()=> {
                             <textarea {...register('locations')} className="form-control my-2" id="textarea"></textarea>
                         </div>
                         <div className="div d-flex justify-content-center mt-3">
-                            <button className="btn btn-primary" type="submit">Subir</button>
+                            <button className="btn btn-primary" type="submit">Upload</button>
                         </div>
                     </form>
-                    <MapView ubicaciones={ubi}></MapView>
+                    <MapView locations={locations}></MapView>
                 </div>
             </div>
         </section>
