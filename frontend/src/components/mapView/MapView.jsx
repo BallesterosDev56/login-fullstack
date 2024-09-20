@@ -2,25 +2,40 @@ import { useMap , MapContainer } from "react-leaflet";
 import L from 'leaflet'
 import mapImage from '../../assets/Colombia_Mapa_Oficial.svg.png'
 import 'leaflet/dist/leaflet.css'
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-const connections = [
-    { ubicacion1: "A", ubicacion2: "B", peso: 20 },
-    { ubicacion1: "B", ubicacion2: "C", peso: 15 },
-    { ubicacion1: "A", ubicacion2: "D", peso: 15 },
-  ];
 
-  
+
   //componente que maneja la imagen superpuesta
-  const ImageOverlay = ({locations, connections})=> {
+const ImageOverlay = ({locations, object})=> {
+    const [routes, setRoutes] = useState([]);
+    const [markers, setMarkers] = useState([]);
 
-      const findUbication = (name)=> {
-          return locations.find((location)=> location.nombre===name);
-      }
+    //hacemos el fetch a las conexiones:
+    useEffect(()=> {
+        const fetchRoute = async ()=> {
+            let response = await fetch('http://localhost:3000/graph', {
+                method: 'POST',
+                headers: {
+                    'Content-Type' : 'application/json'
+                },
+                body : object
+            });
 
-      const map = useMap();
+            let routes = response.json();
+            return routes;
+        }
+        fetchRoute().then(routes => {
+            setRoutes(prev=>[...prev, ...routes]);
+
+        })
+        
+    }, [])
+
+    const map = useMap();
 
     useEffect(()=> {
+
         //definimos los limites de la imagen
         const bounds = [[0, 0], [100, 100]];
 
@@ -30,41 +45,73 @@ const connections = [
         //ajustamos el mapa a los limites de la imagen
         map.fitBounds(bounds);
 
-        //agregar los puntos prefedinidos
+        //agregar los puntos definidos
         locations.forEach((location)=> {
-        L.marker([location.posY, location.posX])
-            .addTo(map)
-            .bindPopup(location.nombre);
+            setMarkers(prev => [...prev, [[location.nombre], [location.posY, location.posX]]]);
 
-        })
+        });
+        if (locations.length>0) {
+        
+            //agregar las conexiones entre los puntos
+            const sortLocations = (locations)=> {
+                let sortedLocations = [];
 
-        //agregar las connections entre los puntos
-        connections.forEach((connection)=> {
-            const punto1 = findUbication(connection.ubicacion1);
-            const punto2 = findUbication(connection.ubicacion2);
-
-            if (punto1 && punto2) {
-                L.polyline(
-                    [
-                        [punto1.posY, punto1.posX], [punto2.posY, punto2.posX]
-                    ],
-                    {
-                        color: 'red'
-                    }
-                ).addTo(map)
-                .bindPopup(`Peso: ${connection.peso}`);
-                
+                for (let i = 0; i < routes.length; i++) {
+                    locations.forEach(nodo => {
+                        if(nodo.nombre == routes[i])
+                            sortedLocations.push(nodo)
+                    })
+                }
+                return sortedLocations;
             }
 
-        })
+            let sortedLocations = sortLocations(locations);
 
-    }, [map, locations])
+            for (let i = 0; i < routes.length; i++) {
+
+                for (let j = 0; j < sortedLocations.length; j++) {
+                    if (routes[i] == sortedLocations[j].nombre) {
+                        
+                        if (sortedLocations[1+j]) {
+                            
+                            L.polyline(
+                                [
+                                    [[sortedLocations[j].posY, sortedLocations[j].posX], [sortedLocations[1+j].posY, sortedLocations[1+j].posX]]
+                                ], {
+                                    color: 'red'
+                                }
+                            )
+                            .addTo(map)
+
+                        }
+                    }
+        
+                }
+                
+            }
+            
+
+        }
+
+    }, [map, locations]);
+
+    useEffect(()=> {
+        if (markers.length == locations.length) {
+            markers.forEach((marker)=> {                
+                L.marker(marker[1])
+                .addTo(map)
+                .bindPopup(marker[0][0]);
+
+            })
+        }
+
+    }, [markers])
 
     return null;
 
 }
 
-export const MapView = ({locations})=> {
+export const MapView = ({locations, object})=> {
     const position = [50, 50];
     const zoom = 1;
     const style = { height: "68vh", width: "46%" }
@@ -77,7 +124,7 @@ export const MapView = ({locations})=> {
             crs={L.CRS.Simple}
         >
 
-        <ImageOverlay locations={locations} connections={connections}></ImageOverlay>
+        <ImageOverlay locations={locations} object={object}></ImageOverlay>
 
         </MapContainer>
     )

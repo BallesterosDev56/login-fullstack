@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MapView } from "../../components/mapView/MapView"
 import { useForm } from "react-hook-form"
 
@@ -6,20 +6,14 @@ export const Home = ()=> {
     const {register, handleSubmit, reset} = useForm();
     const [locations, setlocations] = useState([]);
 
-    const ubi = [
-        { nombre: "A", posX: 20, posY: 20 },
-        { nombre: "B", posX: 40, posY: 80 },
-        { nombre: "C", posX: 69, posY: 40 },
-        { nombre: "D", posX: 59, posY: 20 },
-    ];
-
-    const onSubmit = (data)=> {
-        console.log(data.locations);
-        //ubicaciones de los markups
-        setlocations((prev)=>[...prev, ...data.locations])
+    const onSubmit = (data)=> {                
+        let objectLocations = JSON.parse(data.locations);
+        setlocations((prev)=>[...prev, ...objectLocations.ubicaciones]);
 
         reset();
     }
+
+
 
 
     return(
@@ -36,7 +30,7 @@ export const Home = ()=> {
                             <button className="btn btn-primary" type="submit">Upload</button>
                         </div>
                     </form>
-                    <MapView locations={locations}></MapView>
+                    <MapView locations={locations} object={data.locations}></MapView>
                 </div>
             </div>
         </section>
