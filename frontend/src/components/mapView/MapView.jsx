@@ -1,131 +1,121 @@
-import { useMap , MapContainer } from "react-leaflet";
-import L from 'leaflet'
-import mapImage from '../../assets/Colombia_Mapa_Oficial.svg.png'
-import 'leaflet/dist/leaflet.css'
+import { useMap, MapContainer } from "react-leaflet";
+import L from 'leaflet';
+import mapImage from '../../assets/Colombia_Mapa_Oficial.svg.png';
+import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from "react";
 
-
-
-  //componente que maneja la imagen superpuesta
-const ImageOverlay = ({locations, object})=> {
+// Componente que maneja la imagen superpuesta
+const ImageOverlay = ({ locations, object }) => {
     const [routes, setRoutes] = useState([]);
     const [markers, setMarkers] = useState([]);
+    
+    // Hacemos el fetch a las conexiones:
+    useEffect(() => {
+        const fetchRoute = async () => {
+            try {
+                let response = await fetch('http://localhost:3000/graph', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: object
+                });
 
-    //hacemos el fetch a las conexiones:
-    useEffect(()=> {
-        const fetchRoute = async ()=> {
-            let response = await fetch('http://localhost:3000/graph', {
-                method: 'POST',
-                headers: {
-                    'Content-Type' : 'application/json'
-                },
-                body : object
-            });
+                let routes = await response.json();
 
-            let routes = response.json();
-            return routes;
+                // Verificamos que `routes` sea un array
+                if (Array.isArray(routes.ruta)) {
+                    setRoutes(routes.ruta);
+                } else {
+                    console.error("The fetched routes data is not an array:", routes);
+                }
+            } catch (error) {
+                console.error("Error fetching routes:", error);
+            }
         }
-        fetchRoute().then(routes => {
-            setRoutes(prev=>[...prev, ...routes]);
 
-        })
-        
-    }, [])
+        if (object) {
+            fetchRoute(); // Solo hacemos fetch si existe el objeto.
+        }
+
+    }, [object]);
 
     const map = useMap();
 
-    useEffect(()=> {
-
-        //definimos los limites de la imagen
+    useEffect(() => {
+        // Definimos los límites de la imagen
         const bounds = [[0, 0], [100, 100]];
 
-        //agregamos la imagen superpuesta en el mapa
+        // Agregamos la imagen superpuesta en el mapa
         L.imageOverlay(mapImage, bounds).addTo(map);
 
-        //ajustamos el mapa a los limites de la imagen
+        // Ajustamos el mapa a los límites de la imagen
         map.fitBounds(bounds);
 
-        //agregar los puntos definidos
-        locations.forEach((location)=> {
+        // Agregar los puntos definidos
+        locations.forEach((location) => {
             setMarkers(prev => [...prev, [[location.nombre], [location.posY, location.posX]]]);
-
         });
-        if (locations.length>0) {
-        
-            //agregar las conexiones entre los puntos
-            const sortLocations = (locations)=> {
+
+        if (locations.length > 0 && routes.length > 0) {
+            // Ordenar las ubicaciones según las rutas
+            const sortLocations = (locations) => {
                 let sortedLocations = [];
 
-                for (let i = 0; i < routes.length; i++) {
-                    locations.forEach(nodo => {
-                        if(nodo.nombre == routes[i])
-                            sortedLocations.push(nodo)
-                    })
-                }
+                routes.forEach(route => {
+                    let matchedNode = locations.find(nodo => nodo.nombre === route);
+                    if (matchedNode) {
+                        sortedLocations.push(matchedNode);
+                    }
+                });
                 return sortedLocations;
             }
 
             let sortedLocations = sortLocations(locations);
 
-            for (let i = 0; i < routes.length; i++) {
-
-                for (let j = 0; j < sortedLocations.length; j++) {
-                    if (routes[i] == sortedLocations[j].nombre) {
-                        
-                        if (sortedLocations[1+j]) {
-                            
-                            L.polyline(
-                                [
-                                    [[sortedLocations[j].posY, sortedLocations[j].posX], [sortedLocations[1+j].posY, sortedLocations[1+j].posX]]
-                                ], {
-                                    color: 'red'
-                                }
-                            )
-                            .addTo(map)
-
-                        }
-                    }
-        
+            // Dibujar las rutas en el mapa
+            if (sortedLocations.length > 1) {
+                for (let i = 0; i < sortedLocations.length - 1; i++) {
+                    L.polyline(
+                        [
+                            [sortedLocations[i].posY, sortedLocations[i].posX],
+                            [sortedLocations[i + 1].posY, sortedLocations[i + 1].posX]
+                        ], 
+                        { color: 'red' }
+                    ).addTo(map);
                 }
-                
             }
-            
-
         }
 
-    }, [map, locations]);
+    }, [map, locations, routes]);
 
-    useEffect(()=> {
-        if (markers.length == locations.length) {
-            markers.forEach((marker)=> {                
+    // Agregar los marcadores
+    useEffect(() => {
+        if (markers.length === locations.length) {
+            markers.forEach((marker) => {                
                 L.marker(marker[1])
                 .addTo(map)
                 .bindPopup(marker[0][0]);
-
-            })
+            });
         }
-
-    }, [markers])
+    }, [markers]);
 
     return null;
-
 }
 
-export const MapView = ({locations, object})=> {
+export const MapView = ({ locations, object }) => {
     const position = [50, 50];
     const zoom = 1;
-    const style = { height: "68vh", width: "46%" }
+    const style = { height: "68vh", width: "46%" };
 
-    return(
+    return (
         <MapContainer
             center={position}
             zoom={zoom}
             style={style}
             crs={L.CRS.Simple}
         >
-
-        <ImageOverlay locations={locations} object={object}></ImageOverlay>
-
+            <ImageOverlay locations={locations} object={object}></ImageOverlay>
         </MapContainer>
-    )
+    );
 }
